@@ -1,6 +1,6 @@
 <div class='readonly-sidebar'>
-    <h1 style='line-height: 1.2em'><%= ctx.post.title %></h1>
-    <p style='line-height: 1.2em'><%= ctx.post.description %></p>
+    <h1 class='post-title'><%= ctx.post.title %></h1>
+    <p style='line-height: 1..5em'><%= ctx.post.description %></p>
     <article class='details'>
         <section class='download'>
             <a rel='external' href='<%- ctx.post.contentUrl %>'>
@@ -102,6 +102,7 @@
         }
     %>
     
+    <nav class='tags'>
     <% for (const [category, tags] of Object.entries(categories)) { %>
         <h1><%= category === "default" ? "Other Tags" : kebabToTitleCase(category) %> (<%- tags.length %>)</h1>
         <% if (tags.length) { %>
@@ -116,7 +117,7 @@
                             --></a><!--
                         --><% } %><!--
                         --><% if (ctx.canListPosts) { %><!--
-                            --><a href='<%- ctx.formatClientLink('posts', {query: ctx.escapeTagName(tag.names[0])}) %>' class='<%= ctx.makeCssName(tag.category, 'tag') %>'><!--
+                            --><a href='<%- ctx.formatClientLink('posts', {query: ctx.escapeTagName(tag.names[0])}) %>'><!--
                         --><% } %><!--
                             --><%- ctx.getPrettyName(tag.names[0]) %><!--
                         --><% if (ctx.canListPosts) { %><!--
@@ -135,4 +136,5 @@
             </p>
         <% } %>
     <% } %>
+    </nav>
 </div>

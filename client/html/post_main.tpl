@@ -15,20 +15,6 @@
                     <span class='vim-nav-hint'>&lt; Previous post</span>
                 </a>
             </article>
-            <article class='next-post'>
-                <% if (ctx.nextPostId) { %>
-                    <% if (ctx.editMode) { %>
-                        <a rel='next' href='<%= ctx.getPostEditUrl(ctx.nextPostId, ctx.parameters) %>'>
-                    <% } else { %>
-                        <a rel='next' href='<%= ctx.getPostUrl(ctx.nextPostId, ctx.parameters) %>'>
-                    <% } %>
-                <% } else { %>
-                    <a rel='next' class='inactive'>
-                <% } %>
-                    <i class='fa fa-chevron-right'></i>
-                    <span class='vim-nav-hint'>Next post &gt;</span>
-                </a>
-            </article>
             <% if (ctx.canEditPosts || ctx.canDeletePosts || ctx.canFeaturePosts) { %>
             <article class='edit-post'>
                 <% if (ctx.editMode) { %>
@@ -44,6 +30,21 @@
                 <% } %>
             </article>
             <% } %>
+            <article class='next-post'>
+                <% if (ctx.nextPostId) { %>
+                    <% if (ctx.editMode) { %>
+                        <a rel='next' href='<%= ctx.getPostEditUrl(ctx.nextPostId, ctx.parameters) %>'>
+                    <% } else { %>
+                        <a rel='next' href='<%= ctx.getPostUrl(ctx.nextPostId, ctx.parameters) %>'>
+                    <% } %>
+                <% } else { %>
+                    <a rel='next' class='inactive'>
+                <% } %>
+                    <i class='fa fa-chevron-right'></i>
+                    <span class='vim-nav-hint'>Next post &gt;</span>
+                </a>
+            </article>
+            
         </nav>
 
         <div class='sidebar-container'></div>

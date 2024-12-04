@@ -1,0 +1,7 @@
+services:
+
+  client:
+    ports:
+      - 8081:80
+    volumes:
+      - ./client/public:/var/www

@@ -6,22 +6,40 @@
     flex-direction: row
 
     >.sidebar
+        background: #333;
+        border-radius: 5px;
+        border: 1px solid #444;
+        color: #ddd;
+
+
         margin-right: 1em
         min-width: 21em
         max-width: 21em
         line-height: 160%
 
+        display: flex
+        flex-direction: column
+
         a:active
             border: 0
             outline: 0
+        
+        h1
+            color: #fff
+
+        .post-title
+            margin-top: 0
+            margin-bottom: 1rem
 
     >.sidebar>nav.buttons, >.content nav.buttons
         margin-top: 0
         display: flex
         flex-wrap: wrap
+        padding: 1rem
         article
             flex: 1 0 33%
             a
+                border-radius: 5px
                 display: inline-block
                 width: 100%
                 padding: 0.3em 0
@@ -72,7 +90,13 @@
 
 
 .post-view .readonly-sidebar
+    padding: 1rem
+
     .details
+        background-color: #444
+        font-size: 0.7rem
+        padding: 1em 1.5em
+
         i
             margin-right: 0.6em
             display: inline-block
@@ -126,8 +150,11 @@
             display: inline-block
 
     .tags
-        margin-top: 2em
+        background-color: #444
+        margin-top: 1rem
+        padding: 1rem
         h1
+            font-size: 1rem;
             margin-bottom: 0.5em
 
 .post-view .edit-sidebar
