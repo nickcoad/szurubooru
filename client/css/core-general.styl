@@ -6,6 +6,8 @@ $active-tab-text-color-darktheme = $text-color-darktheme
 $inactive-tab-text-color = $inactive-link-color
 $inactive-tab-text-color-darktheme = $inactive-link-color-darktheme
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
 /* latin */
 @font-face
     font-family: 'Open Sans';
@@ -25,7 +27,7 @@ body
     overflow-y: scroll
     margin: 0
     color: $text-color
-    font-family: 'Open Sans', sans-serif
+    font-family: 'Inter', sans-serif
     font-size: 1em
     line-height: 1.4
     @media (max-width: 800px)
@@ -40,6 +42,10 @@ body.darktheme
 h1, h2, h3
     font-weight: normal
     margin-bottom: 1em
+    overflow-wrap: break-word; /* Prefer breaking at word boundaries */
+    word-break: break-word;    /* Break words only when necessary */
+    hyphens: auto;             /* Add hyphenation where possible (optional) */
+    line-height: 1.2em
 
 h1
     font-size: 2em

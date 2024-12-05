@@ -92,9 +92,49 @@
 .post-view .readonly-sidebar
     padding: 1rem
 
+    .social-container
+        background-color: #444
+        border-radius: 5px
+        padding: 1em 1.5em
+
+        .social
+            display: flex
+            flex-direction: row
+
+            > div
+                flex-grow: 1
+
+            .score-container
+                .fa-thumbs-up
+                    color: #4dff79
+
+                .fa-thumbs-down
+                    color: #ff8c8c
+                    
+                .downvote i
+                    text-align: right
+
+            i
+                text-align: left
+                margin: 0
+
+            .value
+                text-align: center
+                display: inline-block
+                width: 2em
+
+            .fav-container
+                text-align: right
+
+            .remove-favorite
+                .fa-heart
+                    color: #ff8c8c
+
     .details
         background-color: #444
+        border-radius: 5px
         font-size: 0.7rem
+        margin-top: 1rem
         padding: 1em 1.5em
 
         i
@@ -123,21 +163,6 @@
             .active
                 text-decoration: underline
 
-        .social
-            margin-top: 1em
-            .score-container
-                float: left
-                margin-right: 3em
-                .downvote i
-                    text-align: right
-            i
-                text-align: left
-                margin: 0
-            .value
-                text-align: center
-                display: inline-block
-                width: 2em
-
     .relations
         margin-top: 2em
         h1
@@ -151,6 +176,7 @@
 
     .tags
         background-color: #444
+        border-radius: 5px
         margin-top: 1rem
         padding: 1rem
         h1

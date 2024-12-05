@@ -28,7 +28,7 @@ dc-rebuild: ## Rebuild Docker images and restart stack
 
 .PHONY: dc-up-dev
 dc-up-dev: ## Start the stack up in developer mode
-	docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+	docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 
 .PHONY: build-client
 build-client: ## Builds the client locally
