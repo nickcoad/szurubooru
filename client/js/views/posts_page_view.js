@@ -1,6 +1,7 @@
 "use strict";
 
 const events = require("../events.js");
+const misc = require("../util/misc.js");
 const views = require("../util/views.js");
 const TagInputControl = require("../controls/tag_input_control.js");
 const TagList = require("../models/tag_list.js");
@@ -27,7 +28,7 @@ class PostsPageView extends events.EventTarget {
             );
 
             this._tagControl.addEventListener("change", (e) => {
-                this.dispatchEvent(new CustomEvent("change"));
+                this.dispatchEvent(new CustomEvent("bulkEditTagChange", { detail: { tags: this._tagControl.tags } }));
             });
         }
 
@@ -37,22 +38,6 @@ class PostsPageView extends events.EventTarget {
             const postId = listItemNode.getAttribute("data-post-id");
             const post = this._postIdToPost[postId];
             this._postIdToListItemNode[postId] = listItemNode;
-
-            const tagFlipperNode = this._getTagFlipperNode(listItemNode);
-            if (tagFlipperNode) {
-                tagFlipperNode.addEventListener("click", (e) =>
-                    this._evtBulkEditTagsClick(e, post)
-                );
-            }
-
-            const safetyFlipperNode = this._getSafetyFlipperNode(listItemNode);
-            if (safetyFlipperNode) {
-                for (let linkNode of safetyFlipperNode.querySelectorAll("a")) {
-                    linkNode.addEventListener("click", (e) =>
-                        this._evtBulkEditSafetyClick(e, post)
-                    );
-                }
-            }
 
             const deleteFlipperNode = this._getDeleteFlipperNode(listItemNode);
             if (deleteFlipperNode) {
@@ -76,14 +61,6 @@ class PostsPageView extends events.EventTarget {
         return this._hostNode.querySelectorAll("li");
     }
 
-    _getTagFlipperNode(listItemNode) {
-        return listItemNode.querySelector(".tag-flipper");
-    }
-
-    _getSafetyFlipperNode(listItemNode) {
-        return listItemNode.querySelector(".safety-flipper");
-    }
-
     _getDeleteFlipperNode(listItemNode) {
         return listItemNode.querySelector(".delete-flipper");
     }
@@ -91,7 +68,7 @@ class PostsPageView extends events.EventTarget {
     get _bulkEditTagInputNode() {
         return this._hostNode.querySelector(".bulk-edit-form .tags input");
     }
-    
+
     _evtPostChange(e) {
         const listItemNode = this._postIdToListItemNode[e.detail.post.id];
         for (let node of listItemNode.querySelectorAll("[data-disabled]")) {
@@ -100,45 +77,13 @@ class PostsPageView extends events.EventTarget {
         this._syncBulkEditorsHighlights();
     }
 
-    _evtBulkEditTagsClick(e, post) {
-        e.preventDefault();
-        const linkNode = e.target;
-        if (linkNode.getAttribute("data-disabled")) {
-            return;
-        }
-        linkNode.setAttribute("data-disabled", true);
-        this.dispatchEvent(
-            new CustomEvent(
-                linkNode.classList.contains("tagged") ? "untag" : "tag",
-                {
-                    detail: { post: post },
-                }
-            )
-        );
-    }
-
     _evtBulkEditPostClicked(e, postId) {
         this.dispatchEvent(
-            new CustomEvent("post-clicked", {
-                detail: { postId},
-            })
-        );
-    }
-
-    _evtBulkEditSafetyClick(e, post) {
-        e.preventDefault();
-        const linkNode = e.target;
-        if (linkNode.getAttribute("data-disabled")) {
-            return;
-        }
-        const newSafety = linkNode.getAttribute("data-safety");
-        if (post.safety === newSafety) {
-            return;
-        }
-        linkNode.setAttribute("data-disabled", true);
-        this.dispatchEvent(
-            new CustomEvent("changeSafety", {
-                detail: { post: post, safety: newSafety },
+            new CustomEvent("postClick", {
+                detail: {
+                    postId: parseInt(postId),
+                    shiftHeld: e.getModifierState("Shift")
+                },
             })
         );
     }
@@ -161,26 +106,6 @@ class PostsPageView extends events.EventTarget {
         for (let listItemNode of this._listItemNodes) {
             const postId = listItemNode.getAttribute("data-post-id");
             const post = this._postIdToPost[postId];
-
-            const tagFlipperNode = this._getTagFlipperNode(listItemNode);
-            if (tagFlipperNode) {
-                let tagged = true;
-                for (let tag of this._ctx.bulkEdit.tags) {
-                    tagged &= post.tags.isTaggedWith(tag);
-                }
-                tagFlipperNode.classList.toggle("tagged", tagged);
-            }
-
-            const safetyFlipperNode = this._getSafetyFlipperNode(listItemNode);
-            if (safetyFlipperNode) {
-                for (let linkNode of safetyFlipperNode.querySelectorAll("a")) {
-                    const safety = linkNode.getAttribute("data-safety");
-                    linkNode.classList.toggle(
-                        "active",
-                        post.safety === safety
-                    );
-                }
-            }
 
             const deleteFlipperNode = this._getDeleteFlipperNode(listItemNode);
             if (deleteFlipperNode) {

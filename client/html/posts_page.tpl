@@ -11,12 +11,12 @@
         </form>
     </div>
 <% } %>
-<% if (ctx.postFlow) { %><div class='post-list post-flow'><% } else { %><div class='post-list'><% } %>
+<% if (ctx.postFlow) { %><div class='post-list post-flow<%= ctx.isBulkEditing ? ' select-mode' : '' %>'><% } else { %><div class='post-list <%= ctx.isBulkEditing ? 'select-mode' : '' %>'><% } %>
     <% if (ctx.response.results.length) { %>
         <ul>
             <% for (let post of ctx.response.results) { %>
-                <li data-post-id='<%= post.id %>'>
-                    <a class='thumbnail-wrapper <%= ctx.isSelected(post.id) ? 'selected' : '' %> <%= post.tags.length > 0 ? "tags" : "no-tags" %>'
+                <li data-post-id='<%= post.id %>' class='<%= ctx.selectedPosts.has(post.id) ? 'selected' : '' %>'>
+                    <a class='thumbnail-wrapper <%= post.tags.length > 0 ? "tags" : "no-tags" %>'
                             title='<%- post.title %> (<%- post.type %>)&#10;&#10;Tags: <%- post.tags.map(tag => '#' + tag.names[0]).join(' ') || 'none' %>'
                             href='<%= ctx.canViewPosts ? ctx.getPostUrl(post.id, ctx.parameters) : '' %>'>
                         <%= ctx.makeThumbnail(post.thumbnailUrl) %>

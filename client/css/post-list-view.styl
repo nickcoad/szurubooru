@@ -1,6 +1,19 @@
 @import colors
 
 .post-list
+
+    &.select-mode
+        ul
+            li
+                opacity: 0.5
+
+                &.selected
+                    opacity: 1
+
+                    .thumbnail-wrapper
+                        .thumbnail
+                            outline: 4px solid #0f0
+
     ul
         list-style-type: none
         margin: 0
