@@ -2,6 +2,8 @@
 
 const events = require("../events.js");
 const views = require("../util/views.js");
+const TagInputControl = require("../controls/tag_input_control.js");
+const TagList = require("../models/tag_list.js");
 
 const template = views.getTemplate("posts-page");
 
@@ -18,7 +20,19 @@ class PostsPageView extends events.EventTarget {
             post.addEventListener("change", (e) => this._evtPostChange(e));
         }
 
+        if (this._bulkEditTagInputNode) {
+            this._tagControl = new TagInputControl(
+                this._bulkEditTagInputNode,
+                new TagList()
+            );
+
+            this._tagControl.addEventListener("change", (e) => {
+                this.dispatchEvent(new CustomEvent("change"));
+            });
+        }
+
         this._postIdToListItemNode = {};
+
         for (let listItemNode of this._listItemNodes) {
             const postId = listItemNode.getAttribute("data-post-id");
             const post = this._postIdToPost[postId];
@@ -46,6 +60,13 @@ class PostsPageView extends events.EventTarget {
                     this._evtBulkToggleDeleteClick(e, post)
                 );
             }
+
+            if (ctx.isBulkEditing) {
+                listItemNode.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    this._evtBulkEditPostClicked(e, postId);
+                })
+            }
         }
 
         this._syncBulkEditorsHighlights();
@@ -67,6 +88,10 @@ class PostsPageView extends events.EventTarget {
         return listItemNode.querySelector(".delete-flipper");
     }
 
+    get _bulkEditTagInputNode() {
+        return this._hostNode.querySelector(".bulk-edit-form .tags input");
+    }
+    
     _evtPostChange(e) {
         const listItemNode = this._postIdToListItemNode[e.detail.post.id];
         for (let node of listItemNode.querySelectorAll("[data-disabled]")) {
@@ -89,6 +114,14 @@ class PostsPageView extends events.EventTarget {
                     detail: { post: post },
                 }
             )
+        );
+    }
+
+    _evtBulkEditPostClicked(e, postId) {
+        this.dispatchEvent(
+            new CustomEvent("post-clicked", {
+                detail: { postId},
+            })
         );
     }
 

@@ -1,9 +1,22 @@
+<p>Is bulk editing: <%= ctx.isBulkEditing ? 'true' : 'false' %></p>
+<p>Selected posts: <%= JSON.stringify(ctx.selectedPosts) %></p>
+
+<% if (ctx.isBulkEditing) { %>
+    <div class='bulk-edit-form'>
+        <h1>Bulk edit</h1>
+        <form>
+            <section class='tags'>
+                <%= ctx.makeTextInput({}) %>
+            </section>
+        </form>
+    </div>
+<% } %>
 <% if (ctx.postFlow) { %><div class='post-list post-flow'><% } else { %><div class='post-list'><% } %>
     <% if (ctx.response.results.length) { %>
         <ul>
             <% for (let post of ctx.response.results) { %>
                 <li data-post-id='<%= post.id %>'>
-                    <a class='thumbnail-wrapper <%= post.tags.length > 0 ? "tags" : "no-tags" %>'
+                    <a class='thumbnail-wrapper <%= ctx.isSelected(post.id) ? 'selected' : '' %> <%= post.tags.length > 0 ? "tags" : "no-tags" %>'
                             title='<%- post.title %> (<%- post.type %>)&#10;&#10;Tags: <%- post.tags.map(tag => '#' + tag.names[0]).join(' ') || 'none' %>'
                             href='<%= ctx.canViewPosts ? ctx.getPostUrl(post.id, ctx.parameters) : '' %>'>
                         <%= ctx.makeThumbnail(post.thumbnailUrl) %>

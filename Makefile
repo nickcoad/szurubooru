@@ -30,6 +30,10 @@ dc-rebuild: ## Rebuild Docker images and restart stack
 build-client: ## Builds the client locally
 	cd ./client && npm run build
 
+.PHONY: watch-client
+watch-client: ## Watches the client locally and rebuilds on change
+	cd ./client && npm run watch
+
 .PHONY: help
 help:
 	@awk 'BEGIN {FS = ":.*##"; printf "Usage:\n  make \033[36m<target>\033[0m\n\nTargets:\n"} /^[a-zA-Z_\-\\.\/0-9]+:.*?##/ { printf "  \033[36m%s:\033[0m%s\n", $$1, $$2 | "column -c2 -t -s :" }' $(MAKEFILE_LIST)

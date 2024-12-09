@@ -10,6 +10,7 @@ const PageController = require("../controllers/page_controller.js");
 const PostsHeaderView = require("../views/posts_header_view.js");
 const PostsPageView = require("../views/posts_page_view.js");
 const EmptyView = require("../views/empty_view.js");
+const TagInputControl = require("../controls/tag_input_control.js");
 
 const fields = [
     "id",
@@ -54,12 +55,46 @@ class PostListController {
             this._evtNavigate(e)
         );
 
+        if (this._headerView._bulkEditor) {
+            this._headerView._bulkEditor.addEventListener(
+                "startBulkEdit",
+                (e) => {
+                    this._evtStartBulkEdit(e);
+                }
+            );
+        }
+
+        if (this._headerView._bulkEditor) {
+            this._headerView._bulkEditor.addEventListener(
+                "saveBulkEdit",
+                (e) => {
+                    this._evtSaveBulkEdit(e);
+                }
+            );
+        }
+
+        if (this._headerView._bulkEditor) {
+            this._headerView._bulkEditor.addEventListener(
+                "cancelBulkEdit",
+                (e) => {
+                    this._evtCancelBulkEdit(e);
+                }
+            );
+        }
+
         if (this._headerView._bulkDeleteEditor) {
             this._headerView._bulkDeleteEditor.addEventListener(
                 "deleteSelectedPosts",
                 (e) => {
                     this._evtDeleteSelectedPosts(e);
                 }
+            );
+        }
+
+        if (this._bulkEditTagInputNode) {
+            this._tagControl = new TagInputControl(
+                this._bulkEditTagInputNode,
+                []
             );
         }
 
@@ -71,15 +106,26 @@ class PostListController {
         this._pageController.showSuccess(message);
     }
 
-    get _bulkEditTags() {
-        return (this._ctx.parameters.tag || "").split(/\s+/).filter((s) => s);
-    }
-
     _evtNavigate(e) {
         router.showNoDispatch(
             uri.formatClientLink("posts", e.detail.parameters)
         );
         Object.assign(this._ctx.parameters, e.detail.parameters);
+        this._syncPageController();
+    }
+
+    _evtStartBulkEdit(e) {
+        this._isBulkEditing = true;
+        this._syncPageController();
+    }
+
+    _evtSaveBulkEdit(e) {
+        this._isBulkEditing = false;
+        this._syncPageController();
+    }
+
+    _evtCancelBulkEdit(e) {
+        this._isBulkEditing = false;
         this._syncPageController();
     }
 
@@ -135,6 +181,26 @@ class PostListController {
         }
     }
 
+    get selectedPosts() {
+        if (!this._selectedPosts) {
+            this._selectedPosts = []
+        }
+        return this._selectedPosts;
+    }
+
+    _evtPostClicked(e) {
+        if (this.selectedPosts.includes(e.detail.postId)) {
+            const index = this.selectedPosts.indexOf(e.detail.postId);
+            if (index !== -1) { // Check if the number exists in the array
+                this.selectedPosts.splice(index, 1); // Remove one element at the found index
+            }
+        } else {
+            this.selectedPosts.push(e.detail.postId);
+        }
+
+        this._syncPageController();
+    };
+
     _syncPageController() {
         this._pageController.run({
             parameters: this._ctx.parameters,
@@ -157,18 +223,26 @@ class PostListController {
             pageRenderer: (pageCtx) => {
                 Object.assign(pageCtx, {
                     canViewPosts: api.hasPrivilege("posts:view"),
+                    canBulkEdit: api.hasPrivilege("posts:bulk-edit:tags"),
                     canBulkEditTags: api.hasPrivilege("posts:bulk-edit:tags"),
                     canBulkEditSafety: api.hasPrivilege(
                         "posts:bulk-edit:safety"
                     ),
                     canBulkDelete: api.hasPrivilege("posts:bulk-edit:delete"),
+                    isBulkEditing: this._isBulkEditing,
                     bulkEdit: {
                         tags: this._bulkEditTags,
                         markedForDeletion: this._postsMarkedForDeletion,
                     },
+                    selectedPosts: this.selectedPosts,
+                    isSelected: (postId) => this.selectedPosts.includes(postId),
                     postFlow: settings.get().postFlow,
                 });
                 const view = new PostsPageView(pageCtx);
+                view.addEventListener("post-clicked", (e) => this._evtPostClicked(e));
+                // view.addEventListener("startBulkEdit", (e) => this._evtStartBulkEdit(e));
+                // view.addEventListener("applyBulkEdit", (e) => this._evtApplyBulkEdit(e));
+                // view.addEventListener("cancelBulkEdit", (e) => this._evtCancelBulkEdit(e));
                 view.addEventListener("tag", (e) => this._evtTag(e));
                 view.addEventListener("untag", (e) => this._evtUntag(e));
                 view.addEventListener("changeSafety", (e) =>
