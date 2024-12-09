@@ -96,7 +96,7 @@ class BulkEditor extends ToggleableEditor {
         e.preventDefault();
         this.toggleOpen(false);
         this.dispatchEvent(
-            new CustomEvent("saveBulkEdit", { detail: {} })
+            new CustomEvent("bulkEditSaveClick", { detail: {} })
         );
     }
 
@@ -104,7 +104,7 @@ class BulkEditor extends ToggleableEditor {
         e.preventDefault();
         this.toggleOpen(false);
         this.dispatchEvent(
-            new CustomEvent("cancelBulkEdit", { detail: {} })
+            new CustomEvent("bulkEditCancelClick", { detail: {} })
         );
     }
     

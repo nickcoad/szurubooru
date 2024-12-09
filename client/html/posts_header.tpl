@@ -15,7 +15,7 @@
     %><% if (ctx.canBulkEditTags) { %><%
         %><form class='horizontal bulk-edit'><%
             %><a href class='mousetrap button append open'>Bulk edit</a><%
-            %><input href class='mousetrap save' type='submit' value='Save edits'/><%
+            %><input href class='mousetrap save close' type='submit' value='Save edits'/><%
             %><a href class='mousetrap button append cancel close'>Cancel</a><%
         %></form><%
     %><% } %><%

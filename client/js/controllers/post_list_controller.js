@@ -64,22 +64,16 @@ class PostListController {
                     this._evtStartBulkEdit(e);
                 }
             );
-        }
-
-        if (this._headerView._bulkEditor) {
             this._headerView._bulkEditor.addEventListener(
-                "saveBulkEdit",
+                "bulkEditSaveClick",
                 (e) => {
-                    this._evtSaveBulkEdit(e);
+                    this._evtBulkEditSaveClick(e);
                 }
             );
-        }
-
-        if (this._headerView._bulkEditor) {
             this._headerView._bulkEditor.addEventListener(
-                "cancelBulkEdit",
+                "bulkEditCancelClick",
                 (e) => {
-                    this._evtCancelBulkEdit(e);
+                    this._evtBulkEditCancelClick(e);
                 }
             );
         }
@@ -121,16 +115,6 @@ class PostListController {
         this._syncPageController();
     }
 
-    _evtSaveBulkEdit(e) {
-        this._resetBulkEdit();
-        this._syncPageController();
-    }
-
-    _evtCancelBulkEdit(e) {
-        this._resetBulkEdit();
-        this._syncPageController();
-    }
-
     _resetBulkEdit() {
         this._isBulkEditing = false;
         this._selectedPosts = new Set();
@@ -157,8 +141,6 @@ class PostListController {
     }
 
     _evtMarkForDeletion(e) {
-        const postId = e.detail;
-
         // Add or remove post from delete list
         if (e.detail.delete) {
             this._postsMarkedForDeletion.push(e.detail.post);
@@ -189,19 +171,21 @@ class PostListController {
     }
 
     isPostSelected(postId) {
-        const selected = this._selectedPosts.has(parseInt(postId));
+        const selected = this._selectedPosts.has(postId);
         return selected;
     }
 
     _evtPostClick(e) {
-        const postId = e.detail.postId;
+        const postId = e.detail.post.id;
 
         if (e.detail.shiftHeld && this._lastSelectedPost && e.detail.postId !== this._lastSelectedPost) {
-            const [start, finish] = e.detail.postId > this._lastSelectedPost ? [this._lastSelectedPost, e.detail.postId] : [e.detail.postId, this._lastSelectedPost]
+            const [start, finish] = postId > this._lastSelectedPost ? [this._lastSelectedPost, postId] : [postId, this._lastSelectedPost]
 
             for (const currPostId of this._validPostIds) {
                 if (currPostId >= start && currPostId <= finish) {
-                    this._selectedPosts.add(currPostId);
+                    if (!this.isPostSelected(postId)) {
+                        this._selectedPosts.add(currPostId);
+                    }
                 }
             }
         } else {
@@ -209,8 +193,8 @@ class PostListController {
                 this._selectedPosts.delete(postId);
                 this._lastSelectedPost = null;
             } else {
-                this._lastSelectedPost = postId;
                 this._selectedPosts.add(postId);
+                this._lastSelectedPost = postId;
             }
         }
 
@@ -221,12 +205,23 @@ class PostListController {
         this._bulkEditTagsToApply = e.detail.tags;
     };
 
-    _evtBulkEditSaveClick(e) {
+    async _evtBulkEditSaveClick(e) {
         for (const postId of this._selectedPosts) {
-
+            const post = this._postIdToPost[postId];
+            for (const tagToApply of this._bulkEditTagsToApply) {
+                post.tags.addByName(tagToApply.names[0]);
+            }
+            await post.save();
         }
+        this._resetBulkEdit();
+        this._syncPageController();
     }
 
+    _evtBulkEditCancelClick(e) {
+        this._resetBulkEdit();
+        this._syncPageController();
+    }
+    
     _syncPageController() {
         this._pageController.run({
             parameters: this._ctx.parameters,
@@ -248,6 +243,10 @@ class PostListController {
             },
             pageRenderer: (pageCtx) => {
                 this._validPostIds = pageCtx.response.results.map(p => p.id);
+                this._postIdToPost = {};
+                for (let post of pageCtx.response.results) {
+                    this._postIdToPost[post.id] = post;
+                }
                 Object.assign(pageCtx, {
                     canViewPosts: api.hasPrivilege("posts:view"),
                     canBulkEdit: api.hasPrivilege("posts:bulk-edit:tags"),
@@ -262,13 +261,13 @@ class PostListController {
                         markedForDeletion: this._postsMarkedForDeletion,
                     },
                     selectedPosts: this._selectedPosts || new Set(),
+                    bulkEditTagsToApply: this._bulkEditTagsToApply,
                     isSelected: this.isPostSelected,
                     postFlow: settings.get().postFlow,
                 });
                 const view = new PostsPageView(pageCtx);
                 view.addEventListener("postClick", (e) => this._evtPostClick(e));
                 view.addEventListener("bulkEditTagChange", (e) => this._evtBulkEditTagChange(e));
-                view.addEventListener("bulkEditSaveClick", (e) => this._evtBulkEditSaveClick(e));
                 // view.addEventListener("startBulkEdit", (e) => this._evtStartBulkEdit(e));
                 // view.addEventListener("applyBulkEdit", (e) => this._evtApplyBulkEdit(e));
                 // view.addEventListener("cancelBulkEdit", (e) => this._evtCancelBulkEdit(e));

@@ -24,7 +24,7 @@ class PostsPageView extends events.EventTarget {
         if (this._bulkEditTagInputNode) {
             this._tagControl = new TagInputControl(
                 this._bulkEditTagInputNode,
-                new TagList()
+                ctx.bulkEditTagsToApply || new TagList()
             );
 
             this._tagControl.addEventListener("change", (e) => {
@@ -49,7 +49,7 @@ class PostsPageView extends events.EventTarget {
             if (ctx.isBulkEditing) {
                 listItemNode.addEventListener("click", (e) => {
                     e.preventDefault();
-                    this._evtBulkEditPostClicked(e, postId);
+                    this._evtBulkEditPostClicked(e, post);
                 })
             }
         }
@@ -77,11 +77,11 @@ class PostsPageView extends events.EventTarget {
         this._syncBulkEditorsHighlights();
     }
 
-    _evtBulkEditPostClicked(e, postId) {
+    _evtBulkEditPostClicked(e, post) {
         this.dispatchEvent(
             new CustomEvent("postClick", {
                 detail: {
-                    postId: parseInt(postId),
+                    post,
                     shiftHeld: e.getModifierState("Shift")
                 },
             })

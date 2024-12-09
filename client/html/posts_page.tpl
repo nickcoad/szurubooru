@@ -1,6 +1,3 @@
-<p>Is bulk editing: <%= ctx.isBulkEditing ? 'true' : 'false' %></p>
-<p>Selected posts: <%= JSON.stringify(ctx.selectedPosts) %></p>
-
 <% if (ctx.isBulkEditing) { %>
     <div class='bulk-edit-form'>
         <h1>Bulk edit</h1>
