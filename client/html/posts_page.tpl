@@ -7,6 +7,7 @@
                             title='<%- post.title %> (<%- post.type %>)&#10;&#10;Tags: <%- post.tags.map(tag => '#' + tag.names[0]).join(' ') || 'none' %>'
                             href='<%= ctx.canViewPosts ? ctx.getPostUrl(post.id, ctx.parameters) : '' %>'>
                         <%= ctx.makeThumbnail(post.thumbnailUrl) %>
+                        <span class="post-selector"></span>
                         <span class="post-title" style='
                             position: absolute;
                             bottom: 2.3em;
