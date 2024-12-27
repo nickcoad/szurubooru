@@ -7,7 +7,8 @@
                             title='<%- post.title %> (<%- post.type %>)&#10;&#10;Tags: <%- post.tags.map(tag => '#' + tag.names[0]).join(' ') || 'none' %>'
                             href='<%= ctx.canViewPosts ? ctx.getPostUrl(post.id, ctx.parameters) : '' %>'>
                         <%= ctx.makeThumbnail(post.thumbnailUrl) %>
-                        <span class="post-title" style="
+                        <span class="post-selector"></span>
+                        <span class="post-title" style='
                             position: absolute;
                             bottom: 2.3em;
                             left: 0;
@@ -17,7 +18,7 @@
                             margin: 0.5em;
                             font-size: 12px;
                             background: rgba(0,0,0,0.5);
-                        "><%= post.title %></span>
+                        '><%= post.title %></span>
                         <span class='type' data-type='<%- post.type %>'>
                             <% if (post.type == 'video' || post.type == 'flash' || post.type == 'animation') { %>
                                 <span class='icon'><i class='fa fa-film'></i></span>

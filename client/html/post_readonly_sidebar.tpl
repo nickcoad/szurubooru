@@ -1,6 +1,82 @@
 <div class='readonly-sidebar'>
-    <h1 style='line-height: 1.2em'><%= ctx.post.title %></h1>
-    <p style='line-height: 1.2em'><%= ctx.post.description %></p>
+    <h1 class='post-title'><%= ctx.post.title %></h1>
+    <p style='line-height: 1..5em'><%= ctx.post.description %></p>
+    <article class='social-container'>
+        <section class='social'>
+            <div class='score-container'></div>
+
+            <div class='fav-container'></div>
+        </section>
+    </article>
+
+    <% if (ctx.post.relations.length) { %>
+        <nav class='relations'>
+            <h1>Relations (<%- ctx.post.relations.length %>)</h1>
+            <ul><!--
+                --><% for (let post of ctx.post.relations) { %><!--
+                    --><li><!--
+                        --><a href='<%= ctx.getPostUrl(post.id, ctx.parameters) %>'><!--
+                            --><%= ctx.makeThumbnail(post.thumbnailUrl) %><!--
+                        --></a><!--
+                    --></li><!--
+                --><% } %><!--
+            --></ul>
+        </nav>
+    <% } %>
+
+    <%
+        function kebabToTitleCase(str) {
+            return str
+                .split('-') // Split the string into words using the hyphen as the delimiter
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize the first letter of each word
+                .join(' '); // Join the words back together with spaces
+        }
+        const categories = [];
+        
+        for (let tag of ctx.post.tags) {
+            if (!categories[tag.category]) {
+                categories[tag.category] = []
+            }
+            categories[tag.category].push(tag)
+        }
+    %>
+    
+    <nav class='tags'>
+    <% for (const [category, tags] of Object.entries(categories)) { %>
+        <h1><%= category === "default" ? "Other Tags" : kebabToTitleCase(category) %> (<%- tags.length %>)</h1>
+        <% if (tags.length) { %>
+            <ul class='compact-tags'><!--
+                --><% for (const tag of tags) { %><!--
+                    --><li><!--
+                        --><% if (ctx.canViewTags) { %><!--
+                        --><a href='<%- ctx.formatClientLink('tag', tag.names[0]) %>' class='<%= ctx.makeCssName(tag.category, 'tag') %>'><!--
+                            --><i class='fa fa-tag'></i><!--
+                        --><% } %><!--
+                        --><% if (ctx.canViewTags) { %><!--
+                            --></a><!--
+                        --><% } %><!--
+                        --><% if (ctx.canListPosts) { %><!--
+                            --><a href='<%- ctx.formatClientLink('posts', {query: ctx.escapeTagName(tag.names[0])}) %>'><!--
+                        --><% } %><!--
+                            --><%- ctx.getPrettyName(tag.names[0]) %><!--
+                        --><% if (ctx.canListPosts) { %><!--
+                            --></a><!--
+                        --><% } %>&#32;<!--
+                        --><span class='tag-usages' data-pseudo-content='<%- tag.postCount %>'></span><!--
+                    --></li><!--
+                --><% } %><!--
+            --></ul>
+        <% } else { %>
+            <p>
+                No tags yet!
+                <% if (ctx.canEditPosts) { %>
+                    <a href='<%= ctx.getPostEditUrl(ctx.post.id, ctx.parameters) %>'>Add some.</a>
+                <% } %>
+            </p>
+        <% } %>
+    <% } %>
+    </nav>
+
     <article class='details'>
         <section class='download'>
             <a rel='external' href='<%- ctx.post.contentUrl %>'>
@@ -62,77 +138,5 @@
             <a href='https://danbooru.donmai.us/posts?tags=md5:<%- ctx.post.checksumMD5 %>'>Danbooru</a> &middot;
             <a href='https://lens.google.com/uploadbyurl?url=<%- encodeURIComponent(ctx.post.fullContentUrl) %>'>Google Images</a>
         </section>
-
-        <section class='social'>
-            <div class='score-container'></div>
-
-            <div class='fav-container'></div>
-        </section>
     </article>
-
-    <% if (ctx.post.relations.length) { %>
-        <nav class='relations'>
-            <h1>Relations (<%- ctx.post.relations.length %>)</h1>
-            <ul><!--
-                --><% for (let post of ctx.post.relations) { %><!--
-                    --><li><!--
-                        --><a href='<%= ctx.getPostUrl(post.id, ctx.parameters) %>'><!--
-                            --><%= ctx.makeThumbnail(post.thumbnailUrl) %><!--
-                        --></a><!--
-                    --></li><!--
-                --><% } %><!--
-            --></ul>
-        </nav>
-    <% } %>
-
-    <%
-        function kebabToTitleCase(str) {
-            return str
-                .split('-') // Split the string into words using the hyphen as the delimiter
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize the first letter of each word
-                .join(' '); // Join the words back together with spaces
-        }
-        const categories = [];
-        
-        for (let tag of ctx.post.tags) {
-            if (!categories[tag.category]) {
-                categories[tag.category] = []
-            }
-            categories[tag.category].push(tag)
-        }
-    %>
-    
-    <% for (const [category, tags] of Object.entries(categories)) { %>
-        <h1><%= category === "default" ? "Other Tags" : kebabToTitleCase(category) %> (<%- tags.length %>)</h1>
-        <% if (tags.length) { %>
-            <ul class='compact-tags'><!--
-                --><% for (const tag of tags) { %><!--
-                    --><li><!--
-                        --><% if (ctx.canViewTags) { %><!--
-                        --><a href='<%- ctx.formatClientLink('tag', tag.names[0]) %>' class='<%= ctx.makeCssName(tag.category, 'tag') %>'><!--
-                            --><i class='fa fa-tag'></i><!--
-                        --><% } %><!--
-                        --><% if (ctx.canViewTags) { %><!--
-                            --></a><!--
-                        --><% } %><!--
-                        --><% if (ctx.canListPosts) { %><!--
-                            --><a href='<%- ctx.formatClientLink('posts', {query: ctx.escapeTagName(tag.names[0])}) %>' class='<%= ctx.makeCssName(tag.category, 'tag') %>'><!--
-                        --><% } %><!--
-                            --><%- ctx.getPrettyName(tag.names[0]) %><!--
-                        --><% if (ctx.canListPosts) { %><!--
-                            --></a><!--
-                        --><% } %>&#32;<!--
-                        --><span class='tag-usages' data-pseudo-content='<%- tag.postCount %>'></span><!--
-                    --></li><!--
-                --><% } %><!--
-            --></ul>
-        <% } else { %>
-            <p>
-                No tags yet!
-                <% if (ctx.canEditPosts) { %>
-                    <a href='<%= ctx.getPostEditUrl(ctx.post.id, ctx.parameters) %>'>Add some.</a>
-                <% } %>
-            </p>
-        <% } %>
-    <% } %>
 </div>
