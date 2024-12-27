@@ -11,163 +11,140 @@ const TagAutoCompleteControl = require("../controls/tag_auto_complete_control.js
 
 const template = views.getTemplate("posts-header");
 
-class BulkEditor extends events.EventTarget {
-    constructor(hostNode) {
-        super();
-        this._hostNode = hostNode;
-        this._openLinkNode.addEventListener("click", (e) =>
-            this._evtOpenLinkClick(e)
-        );
-        this._closeLinkNode.addEventListener("click", (e) =>
-            this._evtCloseLinkClick(e)
-        );
-    }
+// class ToggleableEditor extends events.EventTarget {
+//     constructor(hostNode) {
+//         super();
+//         this._hostNode = hostNode;
+//         this._openLinkNode.addEventListener("click", (e) =>
+//             this._evtOpenLinkClick(e)
+//         );
+//         this._closeLinkNode.addEventListener("click", (e) =>
+//             this._evtCloseLinkClick(e)
+//         );
+//     }
 
-    get opened() {
-        return (
-            this._hostNode.classList.contains("opened") &&
-            !this._hostNode.classList.contains("hidden")
-        );
-    }
+//     get opened() {
+//         return (
+//             this._hostNode.classList.contains("opened") &&
+//             !this._hostNode.classList.contains("hidden")
+//         );
+//     }
 
-    get _openLinkNode() {
-        return this._hostNode.querySelector(".open");
-    }
+//     get _openLinkNode() {
+//         return this._hostNode.querySelector(".open");
+//     }
 
-    get _closeLinkNode() {
-        return this._hostNode.querySelector(".close");
-    }
+//     get _closeLinkNode() {
+//         return this._hostNode.querySelector(".close");
+//     }
 
-    toggleOpen(state) {
-        this._hostNode.classList.toggle("opened", state);
-    }
+//     toggleOpen(state) {
+//         this._hostNode.classList.toggle("opened", state);
+//     }
 
-    toggleHide(state) {
-        this._hostNode.classList.toggle("hidden", state);
-    }
+//     toggleHide(state) {
+//         this._hostNode.classList.toggle("hidden", state);
+//     }
 
-    _evtOpenLinkClick(e) {
-        throw new Error("Not implemented");
-    }
+//     _evtOpenLinkClick(e) {
+//         throw new Error("Not implemented");
+//     }
 
-    _evtCloseLinkClick(e) {
-        throw new Error("Not implemented");
-    }
-}
+//     _evtCloseLinkClick(e) {
+//         throw new Error("Not implemented");
+//     }
+// }
 
-class BulkSafetyEditor extends BulkEditor {
-    _evtOpenLinkClick(e) {
-        e.preventDefault();
-        this.toggleOpen(true);
-        this.dispatchEvent(new CustomEvent("open", { detail: {} }));
-    }
+// class BulkEditor extends ToggleableEditor {
+//     constructor(hostNode) {
+//         super(hostNode);
+//         this._hostNode = hostNode;
 
-    _evtCloseLinkClick(e) {
-        e.preventDefault();
-        this.toggleOpen(false);
-        this.dispatchEvent(new CustomEvent("close", { detail: {} }));
-    }
-}
+//         this._bulkEditButtonNode.addEventListener("click", (e) =>
+//             this._evtBulkEditButtonClick(e)
+//         );
+//         this._saveButtonNode.addEventListener("click", (e) =>
+//             this._evtSaveButtonClick(e)
+//         );
+//         this._cancelButtonNode.addEventListener("click", (e) =>
+//             this._evtCancelButtonClick(e)
+//         );
+//     }
 
-class BulkTagEditor extends BulkEditor {
-    constructor(hostNode) {
-        super(hostNode);
-        this._autoCompleteControl = new TagAutoCompleteControl(
-            this._inputNode,
-            {
-                confirm: (tag) => {
-                    let tag_list = new TagList();
-                    tag_list
-                        .addByName(tag.names[0], true)
-                        .then(
-                            () => {
-                                return tag_list
-                                    .map((s) => s.names[0])
-                                    .join(" ");
-                            },
-                            (err) => {
-                                return tag.names[0];
-                            }
-                        )
-                        .then((tag_str) => {
-                            this._autoCompleteControl.replaceSelectedText(
-                                tag_str,
-                                false
-                            );
-                        });
-                },
-            }
-        );
-        this._hostNode.addEventListener("submit", (e) =>
-            this._evtFormSubmit(e)
-        );
-    }
+//     get _bulkEditButtonNode() {
+//         return this._hostNode.querySelector(".open");
+//     }
 
-    get value() {
-        return this._inputNode.value;
-    }
+//     get _saveButtonNode() {
+//         return this._hostNode.querySelector(".save");
+//     }
 
-    get _inputNode() {
-        return this._hostNode.querySelector("input[name=tag]");
-    }
+//     get _cancelButtonNode() {
+//         return this._hostNode.querySelector(".cancel");
+//     }
 
-    focus() {
-        this._inputNode.focus();
-    }
+//     _evtBulkEditButtonClick(e) {
+//         e.preventDefault();
+//         this.toggleOpen(true);
+//         this.dispatchEvent(new CustomEvent("startBulkEdit", { detail: {} }));
+//     }
 
-    blur() {
-        this._autoCompleteControl.hide();
-        this._inputNode.blur();
-    }
+//     _evtSaveButtonClick(e) {
+//         e.preventDefault();
+//         this.toggleOpen(false);
+//         this.dispatchEvent(
+//             new CustomEvent("bulkEditSaveClick", { detail: {} })
+//         );
+//     }
 
-    _evtFormSubmit(e) {
-        e.preventDefault();
-        this.dispatchEvent(new CustomEvent("submit", { detail: {} }));
-    }
+//     _evtCancelButtonClick(e) {
+//         e.preventDefault();
+//         this.toggleOpen(false);
+//         this.dispatchEvent(
+//             new CustomEvent("bulkEditCancelClick", { detail: {} })
+//         );
+//     }
 
-    _evtOpenLinkClick(e) {
-        e.preventDefault();
-        this.toggleOpen(true);
-        this.focus();
-        this.dispatchEvent(new CustomEvent("open", { detail: {} }));
-    }
+//     _evtOpenLinkClick(e) {
+//         e.preventDefault();
+//         this.toggleOpen(true);
+//         this.dispatchEvent(new CustomEvent("open", { detail: {} }));
+//     }
 
-    _evtCloseLinkClick(e) {
-        e.preventDefault();
-        this._inputNode.value = "";
-        this.toggleOpen(false);
-        this.blur();
-        this.dispatchEvent(new CustomEvent("close", { detail: {} }));
-    }
-}
+//     _evtCloseLinkClick(e) {
+//         e.preventDefault();
+//         this.toggleOpen(false);
+//         this.dispatchEvent(new CustomEvent("close", { detail: {} }));
+//     }
+// }
 
-class BulkDeleteEditor extends BulkEditor {
-    constructor(hostNode) {
-        super(hostNode);
-        this._hostNode.addEventListener("submit", (e) =>
-            this._evtFormSubmit(e)
-        );
-    }
+// class BulkDeleteEditor extends ToggleableEditor {
+//     constructor(hostNode) {
+//         super(hostNode);
+//         this._hostNode.addEventListener("submit", (e) =>
+//             this._evtFormSubmit(e)
+//         );
+//     }
 
-    _evtFormSubmit(e) {
-        e.preventDefault();
-        this.dispatchEvent(
-            new CustomEvent("deleteSelectedPosts", { detail: {} })
-        );
-    }
+//     _evtFormSubmit(e) {
+//         e.preventDefault();
+//         this.dispatchEvent(
+//             new CustomEvent("deleteSelectedPosts", { detail: {} })
+//         );
+//     }
 
-    _evtOpenLinkClick(e) {
-        e.preventDefault();
-        this.toggleOpen(true);
-        this.dispatchEvent(new CustomEvent("open", { detail: {} }));
-    }
+//     _evtOpenLinkClick(e) {
+//         e.preventDefault();
+//         this.toggleOpen(true);
+//         this.dispatchEvent(new CustomEvent("open", { detail: {} }));
+//     }
 
-    _evtCloseLinkClick(e) {
-        e.preventDefault();
-        this.toggleOpen(false);
-        this.dispatchEvent(new CustomEvent("close", { detail: {} }));
-    }
-}
+//     _evtCloseLinkClick(e) {
+//         e.preventDefault();
+//         this.toggleOpen(false);
+//         this.dispatchEvent(new CustomEvent("close", { detail: {} }));
+//     }
+// }
 
 class PostsHeaderView extends events.EventTarget {
     constructor(ctx) {
@@ -192,101 +169,43 @@ class PostsHeaderView extends events.EventTarget {
         keyboard.bind("p", () => this._focusFirstPostNode());
         search.searchInputNodeFocusHelper(this._queryInputNode);
 
-        for (let safetyButtonNode of this._safetyButtonNodes) {
-            safetyButtonNode.addEventListener("click", (e) =>
-                this._evtSafetyButtonClick(e)
-            );
-        }
         this._formNode.addEventListener("submit", (e) =>
             this._evtFormSubmit(e)
         );
 
-        this._bulkEditors = [];
-        if (this._bulkEditTagsNode) {
-            this._bulkTagEditor = new BulkTagEditor(this._bulkEditTagsNode);
-            this._bulkEditors.push(this._bulkTagEditor);
-        }
+        this._bulkEditBtn.addEventListener("click", (e) => {
+            this._evtBulkEditButtonClick(e);
+        });
 
-        if (this._bulkEditSafetyNode) {
-            this._bulkSafetyEditor = new BulkSafetyEditor(
-                this._bulkEditSafetyNode
-            );
-            this._bulkEditors.push(this._bulkSafetyEditor);
-        }
-
-        if (this._bulkEditDeleteNode) {
-            this._bulkDeleteEditor = new BulkDeleteEditor(
-                this._bulkEditDeleteNode
-            );
-            this._bulkEditors.push(this._bulkDeleteEditor);
-        }
-
-        for (let editor of this._bulkEditors) {
-            editor.addEventListener("submit", (e) => {
-                this._navigate();
-            });
-            editor.addEventListener("open", (e) => {
-                this._hideBulkEditorsExcept(editor);
-                this._navigate();
-            });
-            editor.addEventListener("close", (e) => {
-                this._closeAndShowAllBulkEditors();
-                this._navigate();
-            });
-        }
-
-        if (ctx.parameters.tag && this._bulkTagEditor) {
-            this._openBulkEditor(this._bulkTagEditor);
-        } else if (ctx.parameters.safety && this._bulkSafetyEditor) {
-            this._openBulkEditor(this._bulkSafetyEditor);
-        } else if (ctx.parameters.delete && this._bulkDeleteEditor) {
-            this._openBulkEditor(this._bulkDeleteEditor);
-        }
+        this._deselectAllBtn.addEventListener("click", (e) => {
+            this._evtDeselectAllButtonClick(e);
+        });
     }
 
     get _formNode() {
         return this._hostNode.querySelector("form.search");
     }
 
-    get _safetyButtonNodes() {
-        return this._hostNode.querySelectorAll("form .safety");
-    }
-
     get _queryInputNode() {
         return this._hostNode.querySelector("form [name=search-text]");
     }
 
-    get _bulkEditTagsNode() {
-        return this._hostNode.querySelector(".bulk-edit-tags");
+    get _bulkEditBtn() {
+        return this._hostNode.querySelector(".btn--bulk-edit");
     }
 
-    get _bulkEditSafetyNode() {
-        return this._hostNode.querySelector(".bulk-edit-safety");
+    get _deselectAllBtn() {
+        return this._hostNode.querySelector(".btn--deselect-all");
     }
 
-    get _bulkEditDeleteNode() {
-        return this._hostNode.querySelector(".bulk-edit-delete");
+    _evtBulkEditButtonClick(e) {
+        e.preventDefault();
+        this.dispatchEvent(new CustomEvent("bulkEditClick"));
     }
 
-    _openBulkEditor(editor) {
-        editor.toggleOpen(true);
-        this._hideBulkEditorsExcept(editor);
-    }
-
-    _hideBulkEditorsExcept(editor) {
-        for (let otherEditor of this._bulkEditors) {
-            if (otherEditor !== editor) {
-                otherEditor.toggleOpen(false);
-                otherEditor.toggleHide(true);
-            }
-        }
-    }
-
-    _closeAndShowAllBulkEditors() {
-        for (let otherEditor of this._bulkEditors) {
-            otherEditor.toggleOpen(false);
-            otherEditor.toggleHide(false);
-        }
+    _evtDeselectAllButtonClick(e, url) {
+        e.preventDefault();
+        this.dispatchEvent(new CustomEvent("deselectAllClick"));
     }
 
     _evtSafetyButtonClick(e, url) {

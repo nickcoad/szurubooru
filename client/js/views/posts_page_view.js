@@ -1,7 +1,10 @@
 "use strict";
 
 const events = require("../events.js");
+const misc = require("../util/misc.js");
 const views = require("../util/views.js");
+const TagInputControl = require("../controls/tag_input_control.js");
+const TagList = require("../models/tag_list.js");
 
 const template = views.getTemplate("posts-page");
 
@@ -18,27 +21,27 @@ class PostsPageView extends events.EventTarget {
             post.addEventListener("change", (e) => this._evtPostChange(e));
         }
 
+        if (this._bulkEditTagInputNode) {
+            this._tagControl = new TagInputControl(
+                this._bulkEditTagInputNode,
+                ctx.bulkEditTagsToApply || new TagList()
+            );
+
+            this._tagControl.addEventListener("change", (e) => {
+                this.dispatchEvent(
+                    new CustomEvent("bulkEditTagChange", {
+                        detail: { tags: this._tagControl.tags },
+                    })
+                );
+            });
+        }
+
         this._postIdToListItemNode = {};
+
         for (let listItemNode of this._listItemNodes) {
             const postId = listItemNode.getAttribute("data-post-id");
             const post = this._postIdToPost[postId];
             this._postIdToListItemNode[postId] = listItemNode;
-
-            const tagFlipperNode = this._getTagFlipperNode(listItemNode);
-            if (tagFlipperNode) {
-                tagFlipperNode.addEventListener("click", (e) =>
-                    this._evtBulkEditTagsClick(e, post)
-                );
-            }
-
-            const safetyFlipperNode = this._getSafetyFlipperNode(listItemNode);
-            if (safetyFlipperNode) {
-                for (let linkNode of safetyFlipperNode.querySelectorAll("a")) {
-                    linkNode.addEventListener("click", (e) =>
-                        this._evtBulkEditSafetyClick(e, post)
-                    );
-                }
-            }
 
             const deleteFlipperNode = this._getDeleteFlipperNode(listItemNode);
             if (deleteFlipperNode) {
@@ -46,25 +49,56 @@ class PostsPageView extends events.EventTarget {
                     this._evtBulkToggleDeleteClick(e, post)
                 );
             }
+
+            const postSelector = listItemNode.querySelector(".post-selector");
+            if (postSelector) {
+                // Use the post selector if we're not in select mode...
+                postSelector.addEventListener("click", (e) => {
+                    if (!ctx.isSelecting) {
+                        e.preventDefault();
+                        this._evtPostSelectorClicked(e, post);
+                    }
+                });
+
+                // ...otherwise treat the entire post as a clickable selector
+                listItemNode.addEventListener("click", (e) => {
+                    if (ctx.isSelecting) {
+                        e.preventDefault();
+                        this._evtPostSelectorClicked(e, post);
+                    }
+                });
+            }
         }
 
+        this._bulkEditSaveButton.addEventListener("click", (e) => {
+            this.dispatchEvent(new CustomEvent("bulkEditSaveClick"));
+        });
+
+        this._bulkEditCancelButton.addEventListener("click", (e) => {
+            this.dispatchEvent(new CustomEvent("bulkEditCancelClick"));
+        });
+
         this._syncBulkEditorsHighlights();
+    }
+
+    get _bulkEditSaveButton() {
+        return this._hostNode.querySelector(".btn--bulk-edit-save");
+    }
+
+    get _bulkEditCancelButton() {
+        return this._hostNode.querySelector(".btn--bulk-edit-cancel");
     }
 
     get _listItemNodes() {
         return this._hostNode.querySelectorAll("li");
     }
 
-    _getTagFlipperNode(listItemNode) {
-        return listItemNode.querySelector(".tag-flipper");
-    }
-
-    _getSafetyFlipperNode(listItemNode) {
-        return listItemNode.querySelector(".safety-flipper");
-    }
-
     _getDeleteFlipperNode(listItemNode) {
         return listItemNode.querySelector(".delete-flipper");
+    }
+
+    get _bulkEditTagInputNode() {
+        return this._hostNode.querySelector(".bulk-edit-form .tags input");
     }
 
     _evtPostChange(e) {
@@ -75,37 +109,21 @@ class PostsPageView extends events.EventTarget {
         this._syncBulkEditorsHighlights();
     }
 
-    _evtBulkEditTagsClick(e, post) {
-        e.preventDefault();
-        const linkNode = e.target;
-        if (linkNode.getAttribute("data-disabled")) {
-            return;
-        }
-        linkNode.setAttribute("data-disabled", true);
+    _evtBulkEditPostClicked(e, post) {
         this.dispatchEvent(
-            new CustomEvent(
-                linkNode.classList.contains("tagged") ? "untag" : "tag",
-                {
-                    detail: { post: post },
-                }
-            )
+            new CustomEvent("postClick", {
+                detail: {
+                    post,
+                    shiftHeld: e.getModifierState("Shift"),
+                },
+            })
         );
     }
 
-    _evtBulkEditSafetyClick(e, post) {
-        e.preventDefault();
-        const linkNode = e.target;
-        if (linkNode.getAttribute("data-disabled")) {
-            return;
-        }
-        const newSafety = linkNode.getAttribute("data-safety");
-        if (post.safety === newSafety) {
-            return;
-        }
-        linkNode.setAttribute("data-disabled", true);
+    _evtPostSelectorClicked(e, post) {
         this.dispatchEvent(
-            new CustomEvent("changeSafety", {
-                detail: { post: post, safety: newSafety },
+            new CustomEvent("postSelectorClick", {
+                detail: { post, shiftHeld: e.getModifierState("Shift") },
             })
         );
     }
@@ -128,26 +146,6 @@ class PostsPageView extends events.EventTarget {
         for (let listItemNode of this._listItemNodes) {
             const postId = listItemNode.getAttribute("data-post-id");
             const post = this._postIdToPost[postId];
-
-            const tagFlipperNode = this._getTagFlipperNode(listItemNode);
-            if (tagFlipperNode) {
-                let tagged = true;
-                for (let tag of this._ctx.bulkEdit.tags) {
-                    tagged &= post.tags.isTaggedWith(tag);
-                }
-                tagFlipperNode.classList.toggle("tagged", tagged);
-            }
-
-            const safetyFlipperNode = this._getSafetyFlipperNode(listItemNode);
-            if (safetyFlipperNode) {
-                for (let linkNode of safetyFlipperNode.querySelectorAll("a")) {
-                    const safety = linkNode.getAttribute("data-safety");
-                    linkNode.classList.toggle(
-                        "active",
-                        post.safety === safety
-                    );
-                }
-            }
 
             const deleteFlipperNode = this._getDeleteFlipperNode(listItemNode);
             if (deleteFlipperNode) {

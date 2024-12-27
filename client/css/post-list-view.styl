@@ -1,6 +1,22 @@
 @import colors
 
 .post-list
+
+    &.select-mode
+        ul
+            li
+                opacity: 0.5
+
+                &.selected
+                    opacity: 1
+
+                    .thumbnail-wrapper
+                        .thumbnail
+                            outline: 2px solid #fff
+
+                .post-selector
+                    display: block
+
     ul
         list-style-type: none
         margin: 0
@@ -22,6 +38,10 @@
                 min-height: 7.5em
                 height: 9vw
 
+            &.selected 
+                .post-selected
+                    display: block
+
             .thumbnail-wrapper
                 display: inline-block
                 width: 100%
@@ -32,27 +52,46 @@
                 outline-offset: -3px
                 box-shadow: 0 0 0 1px rgba(0,0,0,0.2)
 
-                .type, .stats
-                    position: absolute
-                    bottom: 0.5em
-                    padding: 0.33em 0.5em
-                    background: rgba(0,0,0,0.5)
-                    height: 1em
+            .post-selector
+                border: 3px solid #fff
+                display: none
+                position: absolute
+                top: 0.5em
+                left: 0.5em
+                height: 25px
+                width: 25px
+                border-radius: 25px
 
-                .type
-                    float: left
-                    left: 0.5em
-                    &[data-type=image]
-                        display: none
+            .post-selected
+                background-color: #fff
+                border-radius: 20px
+                display: none
+                margin-left: 3px
+                margin-top: 3px
+                height: 19px
+                width: 19px
 
-                .stats
-                    float: right
-                    right: 0.5em
-                    text-align: right
-                    i
-                        margin-right: 0.25em
-                    .icon:not(:first-of-type)
-                        margin-left: 1em
+            .type, .stats
+                position: absolute
+                bottom: 0.5em
+                padding: 0.33em 0.5em
+                background: rgba(0,0,0,0.5)
+                height: 1em
+
+            .type
+                float: left
+                left: 0.5em
+                &[data-type=image]
+                    display: none
+
+            .stats
+                float: right
+                right: 0.5em
+                text-align: right
+                i
+                    margin-right: 0.25em
+                .icon:not(:first-of-type)
+                    margin-left: 1em
 
             .edit-overlay
                 position: absolute
@@ -154,6 +193,8 @@
                 background: $post-thumbnail-border-color
                 .thumbnail
                     opacity: .9
+                .post-selector
+                    display: block
 
             &:hover a, a:active, a:focus
                 .thumbnail
@@ -272,3 +313,43 @@
             border-color: @background-color
             &.disabled
                 background-color: alpha(@background-color, 0.15)
+
+/* CSS */
+
+
+/* Modal Overlay: Full-screen background */
+.modal-overlay
+    position: fixed
+    inset: 0
+    background-color: rgba(0, 0, 0, 0.5)
+    display: flex
+    justify-content: center
+    align-items: center
+    z-index: 1
+
+/* Modal Box: The actual modal */
+.modal-box
+    background-color: #222; /* Modal background color */
+    padding: 1.5rem; /* Padding inside the modal */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25); /* Subtle shadow for depth */
+    max-width: 90%; /* Ensure it doesn’t overflow on small screens */
+    width: 400px; /* Default width */
+    text-align: center; /* Center content inside the modal */
+
+    /* Button Styling */
+    button
+        background-color: #333
+        border: none
+        border-radius: 4px
+        color: white
+        cursor: pointer
+        font-size: 1rem
+        margin-top: 1rem
+        padding: 0.5rem 1rem
+
+        &.btn--primary
+            background-color: #9100ff
+
+            &:hover
+                background-color: #7204c6

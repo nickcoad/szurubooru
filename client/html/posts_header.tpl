@@ -12,26 +12,24 @@
         %><wbr/><%
         %><a class='mousetrap button append' href='<%- ctx.formatClientLink('help', 'search', 'posts') %>'>Syntax help</a><%
     %></form><%
-    %><% if (ctx.canBulkEditTags) { %><%
-        %><form class='horizontal bulk-edit bulk-edit-tags'><%
-            %><span class='append hint'>Tagging with:</span><%
-            %><a href class='mousetrap button append open'>Mass tag</a><%
-            %><%= ctx.makeTextInput({name: 'tag', value: ctx.parameters.tag}) %><%
-            %><input class='mousetrap start' type='submit' value='Start tagging'/><%
-            %><a href class='mousetrap button append close'>Stop tagging</a><%
-        %></form><%
-    %><% } %><%
-    %><% if (ctx.enableSafety && ctx.canBulkEditSafety) { %><%
-        %><form class='horizontal bulk-edit bulk-edit-safety'><%
-            %><a href class='mousetrap button append open'>Mass edit safety</a><%
-            %><a href class='mousetrap button append close'>Stop editing safety</a><%
-        %></form><%
-    %><% } %><%
-    %><% if (ctx.canBulkDelete) { %><%
-        %><form class='horizontal bulk-edit bulk-edit-delete'><%
-            %><a href class='mousetrap button append open'>Mass delete</a><%
-            %><input class='mousetrap start' type='submit' value='Delete selected posts'/><%
-            %><a href class='mousetrap button append close'>Stop deleting</a><%
-        %></form><%
-    %><% } %><%
+    %><div style='display: none'><%
+        %><% if (ctx.canBulkEditTags) { %><%
+            %><form class='horizontal bulk-edit'><%
+                %><a href class='mousetrap button append open'>Bulk edit</a><%
+                %><input href class='mousetrap save close' type='submit' value='Save edits'/><%
+                %><a href class='mousetrap button append cancel close'>Cancel</a><%
+            %></form><%
+        %><% } %><%
+        %><% if (ctx.canBulkDelete) { %><%
+            %><form class='horizontal bulk-delete'><%
+                %><a href class='mousetrap button append open'>Bulk delete</a><%
+                %><input class='mousetrap start' type='submit' value='Delete selected posts'/><%
+                %><a href class='mousetrap button append close'>Stop deleting</a><%
+            %></form><%
+        %><% } %><%
+    %></div><%
+    %><div class='<%- ctx.isSelecting ? 'show' : 'hide' %>'><%
+        %><a href class='mousetrap button btn--bulk-edit'>Bulk edit</a><%
+        %><a href class='mousetrap button btn--deselect-all'>Deselect all</a><%
+    %></div><%
 %></div>

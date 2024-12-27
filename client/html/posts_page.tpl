@@ -1,13 +1,29 @@
-<% if (ctx.postFlow) { %><div class='post-list post-flow'><% } else { %><div class='post-list'><% } %>
+<div class="modal-container <%- ctx.isBulkEditing ? 'show' : 'hide' %>">
+    <div class="modal-overlay">
+        <div class="modal-box">
+            <h2>Bulk edit</h2>
+            <div class='bulk-edit-form'>
+                <form>
+                    <section class='tags'>
+                        <%= ctx.makeTextInput({}) %>
+                    </section>
+                </form>
+            </div>
+            <button class="btn--bulk-edit-save btn--primary">Save</button>
+            <button class="btn--bulk-edit-cancel close-button">Cancel</button>
+        </div>
+    </div>
+</div>
+<% if (ctx.postFlow) { %><div class='post-list post-flow<%= ctx.isBulkEditing || ctx.isSelecting ? ' select-mode' : '' %>'><% } else { %><div class='post-list <%= ctx.isBulkEditing ? 'select-mode' : '' %>'><% } %>
     <% if (ctx.response.results.length) { %>
         <ul>
             <% for (let post of ctx.response.results) { %>
-                <li data-post-id='<%= post.id %>'>
+                <li data-post-id='<%= post.id %>' class='<%= ctx.selectedPosts.has(post.id) ? 'selected' : '' %>'>
                     <a class='thumbnail-wrapper <%= post.tags.length > 0 ? "tags" : "no-tags" %>'
                             title='<%- post.title %> (<%- post.type %>)&#10;&#10;Tags: <%- post.tags.map(tag => '#' + tag.names[0]).join(' ') || 'none' %>'
                             href='<%= ctx.canViewPosts ? ctx.getPostUrl(post.id, ctx.parameters) : '' %>'>
                         <%= ctx.makeThumbnail(post.thumbnailUrl) %>
-                        <span class="post-selector"></span>
+                        <span class="post-selector"><div class="post-selected"></div></span>
                         <span class="post-title" style='
                             position: absolute;
                             bottom: 2.3em;
