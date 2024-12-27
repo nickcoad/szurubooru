@@ -14,7 +14,7 @@
         </div>
     </div>
 </div>
-<% if (ctx.postFlow) { %><div class='post-list post-flow<%= ctx.isBulkEditing || ctx.isSelecting ? ' select-mode' : '' %>'><% } else { %><div class='post-list <%= ctx.isBulkEditing ? 'select-mode' : '' %>'><% } %>
+<% if (ctx.postFlow) { %><div class='post-list post-flow<%= ctx.isBulkEditing || ctx.isSelecting ? ' select-mode' : '' %>'><% } else { %><div class='post-list<%= ctx.isBulkEditing || ctx.isSelecting ? ' select-mode' : '' %>'><% } %>
     <% if (ctx.response.results.length) { %>
         <ul>
             <% for (let post of ctx.response.results) { %>
