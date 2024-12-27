@@ -67,6 +67,9 @@ class ManualPageView {
     }
 
     run(ctx) {
+        history.state.scrollX = window.scrollX;
+        history.state.scrollY = window.scrollY;
+
         const offset = parseInt(ctx.parameters.offset || 0);
         const limit = parseInt(ctx.parameters.limit || ctx.defaultLimit);
         this.clearMessages();
