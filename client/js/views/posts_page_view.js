@@ -28,7 +28,11 @@ class PostsPageView extends events.EventTarget {
             );
 
             this._tagControl.addEventListener("change", (e) => {
-                this.dispatchEvent(new CustomEvent("bulkEditTagChange", { detail: { tags: this._tagControl.tags } }));
+                this.dispatchEvent(
+                    new CustomEvent("bulkEditTagChange", {
+                        detail: { tags: this._tagControl.tags },
+                    })
+                );
             });
         }
 
@@ -46,15 +50,43 @@ class PostsPageView extends events.EventTarget {
                 );
             }
 
-            if (ctx.isBulkEditing) {
+            const postSelector = listItemNode.querySelector(".post-selector");
+            if (postSelector) {
+                // Use the post selector if we're not in select mode...
+                postSelector.addEventListener("click", (e) => {
+                    if (!ctx.isSelecting) {
+                        e.preventDefault();
+                        this._evtPostSelectorClicked(e, post);
+                    }
+                });
+
+                // ...otherwise treat the entire post as a clickable selector
                 listItemNode.addEventListener("click", (e) => {
-                    e.preventDefault();
-                    this._evtBulkEditPostClicked(e, post);
-                })
+                    if (ctx.isSelecting) {
+                        e.preventDefault();
+                        this._evtPostSelectorClicked(e, post);
+                    }
+                });
             }
         }
 
+        this._bulkEditSaveButton.addEventListener("click", (e) => {
+            this.dispatchEvent(new CustomEvent("bulkEditSaveClick"));
+        });
+
+        this._bulkEditCancelButton.addEventListener("click", (e) => {
+            this.dispatchEvent(new CustomEvent("bulkEditCancelClick"));
+        });
+
         this._syncBulkEditorsHighlights();
+    }
+
+    get _bulkEditSaveButton() {
+        return this._hostNode.querySelector(".btn--bulk-edit-save");
+    }
+
+    get _bulkEditCancelButton() {
+        return this._hostNode.querySelector(".btn--bulk-edit-cancel");
     }
 
     get _listItemNodes() {
@@ -82,8 +114,16 @@ class PostsPageView extends events.EventTarget {
             new CustomEvent("postClick", {
                 detail: {
                     post,
-                    shiftHeld: e.getModifierState("Shift")
+                    shiftHeld: e.getModifierState("Shift"),
                 },
+            })
+        );
+    }
+
+    _evtPostSelectorClicked(e, post) {
+        this.dispatchEvent(
+            new CustomEvent("postSelectorClick", {
+                detail: { post, shiftHeld: e.getModifierState("Shift") },
             })
         );
     }

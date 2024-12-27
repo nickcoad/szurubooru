@@ -42,50 +42,21 @@ class PostListController {
         topNavigation.activate("posts");
         topNavigation.setTitle("Listing posts");
 
-        this._headerView = new PostsHeaderView({
+        this._headerCtx = {
             hostNode: this._pageController.view.pageHeaderHolderNode,
             parameters: ctx.parameters,
             enableSafety: api.safetyEnabled(),
             canBulkEditTags: api.hasPrivilege("posts:bulk-edit:tags"),
             canBulkEditSafety: api.hasPrivilege("posts:bulk-edit:safety"),
             canBulkDelete: api.hasPrivilege("posts:bulk-edit:delete"),
+            isSelecting: this._isSelecting,
             bulkEdit: {
                 tags: this._bulkEditTags,
             },
-        });
-        this._headerView.addEventListener("navigate", (e) =>
-            this._evtNavigate(e)
-        );
+        };
 
-        if (this._headerView._bulkEditor) {
-            this._headerView._bulkEditor.addEventListener(
-                "startBulkEdit",
-                (e) => {
-                    this._evtStartBulkEdit(e);
-                }
-            );
-            this._headerView._bulkEditor.addEventListener(
-                "bulkEditSaveClick",
-                (e) => {
-                    this._evtBulkEditSaveClick(e);
-                }
-            );
-            this._headerView._bulkEditor.addEventListener(
-                "bulkEditCancelClick",
-                (e) => {
-                    this._evtBulkEditCancelClick(e);
-                }
-            );
-        }
-
-        if (this._headerView._bulkDeleteEditor) {
-            this._headerView._bulkDeleteEditor.addEventListener(
-                "deleteSelectedPosts",
-                (e) => {
-                    this._evtDeleteSelectedPosts(e);
-                }
-            );
-        }
+        this._headerView = new PostsHeaderView(this._headerCtx);
+        this.addHeaderEvents(this._headerView);
 
         if (this._bulkEditTagInputNode) {
             this._tagControl = new TagInputControl(
@@ -96,6 +67,49 @@ class PostListController {
 
         this._postsMarkedForDeletion = [];
         this._syncPageController();
+    }
+
+    get _isSelecting() {
+        return this._selectedPosts.size > 0;
+    }
+
+    addHeaderEvents(headerView) {
+        headerView.addEventListener("navigate", (e) => this._evtNavigate(e));
+
+        headerView.addEventListener("bulkEditClick", (e) => {
+            this._evtBulkEditClick(e);
+        });
+
+        headerView.addEventListener("deselectAllClick", (e) => {
+            this._evtDeselectAllClick(e);
+        });
+
+        if (headerView._bulkEditor) {
+            headerView._bulkEditor.addEventListener("startBulkEdit", (e) => {
+                this._evtStartBulkEdit(e);
+            });
+            headerView._bulkEditor.addEventListener(
+                "bulkEditSaveClick",
+                (e) => {
+                    this._evtBulkEditSaveClick(e);
+                }
+            );
+            headerView._bulkEditor.addEventListener(
+                "bulkEditCancelClick",
+                (e) => {
+                    this._evtBulkEditCancelClick(e);
+                }
+            );
+        }
+
+        if (headerView._bulkDeleteEditor) {
+            headerView._bulkDeleteEditor.addEventListener(
+                "deleteSelectedPosts",
+                (e) => {
+                    this._evtDeleteSelectedPosts(e);
+                }
+            );
+        }
     }
 
     showSuccess(message) {
@@ -110,14 +124,18 @@ class PostListController {
         this._syncPageController();
     }
 
-    _evtStartBulkEdit(e) {
+    _evtBulkEditClick(e) {
         this._isBulkEditing = true;
         this._syncPageController();
     }
 
-    _resetBulkEdit() {
-        this._isBulkEditing = false;
+    _evtDeselectAllClick(e) {
         this._selectedPosts = new Set();
+        this._syncPageController();
+    }
+
+    _evtBulkEditCancelClick() {
+        this._isBulkEditing = false;
     }
 
     _evtTag(e) {
@@ -175,11 +193,18 @@ class PostListController {
         return selected;
     }
 
-    _evtPostClick(e) {
+    _evtPostSelectorClick(e) {
         const postId = e.detail.post.id;
 
-        if (e.detail.shiftHeld && this._lastSelectedPost && e.detail.postId !== this._lastSelectedPost) {
-            const [start, finish] = postId > this._lastSelectedPost ? [this._lastSelectedPost, postId] : [postId, this._lastSelectedPost]
+        if (
+            e.detail.shiftHeld &&
+            this._lastSelectedPost &&
+            e.detail.postId !== this._lastSelectedPost
+        ) {
+            const [start, finish] =
+                postId > this._lastSelectedPost
+                    ? [this._lastSelectedPost, postId]
+                    : [postId, this._lastSelectedPost];
 
             for (const currPostId of this._validPostIds) {
                 if (currPostId >= start && currPostId <= finish) {
@@ -199,11 +224,11 @@ class PostListController {
         }
 
         this._syncPageController();
-    };
+    }
 
     _evtBulkEditTagChange(e) {
         this._bulkEditTagsToApply = e.detail.tags;
-    };
+    }
 
     async _evtBulkEditSaveClick(e) {
         for (const postId of this._selectedPosts) {
@@ -213,16 +238,21 @@ class PostListController {
             }
             await post.save();
         }
-        this._resetBulkEdit();
+        this._isBulkEditing = false;
+        this._selectedPosts = new Set();
         this._syncPageController();
     }
 
     _evtBulkEditCancelClick(e) {
-        this._resetBulkEdit();
+        this._isBulkEditing = false;
         this._syncPageController();
     }
-    
+
     _syncPageController() {
+        this._headerCtx.isSelecting = this._isSelecting;
+        this._headerView = new PostsHeaderView(this._headerCtx);
+        this.addHeaderEvents(this._headerView);
+
         this._pageController.run({
             parameters: this._ctx.parameters,
             defaultLimit: parseInt(settings.get().postsPerPage),
@@ -242,7 +272,7 @@ class PostListController {
                 );
             },
             pageRenderer: (pageCtx) => {
-                this._validPostIds = pageCtx.response.results.map(p => p.id);
+                this._validPostIds = pageCtx.response.results.map((p) => p.id);
                 this._postIdToPost = {};
                 for (let post of pageCtx.response.results) {
                     this._postIdToPost[post.id] = post;
@@ -255,6 +285,7 @@ class PostListController {
                         "posts:bulk-edit:safety"
                     ),
                     canBulkDelete: api.hasPrivilege("posts:bulk-edit:delete"),
+                    isSelecting: this._isSelecting,
                     isBulkEditing: this._isBulkEditing,
                     bulkEdit: {
                         tags: this._bulkEditTags,
@@ -266,8 +297,21 @@ class PostListController {
                     postFlow: settings.get().postFlow,
                 });
                 const view = new PostsPageView(pageCtx);
-                view.addEventListener("postClick", (e) => this._evtPostClick(e));
-                view.addEventListener("bulkEditTagChange", (e) => this._evtBulkEditTagChange(e));
+                view.addEventListener("postSelectorClick", (e) =>
+                    this._evtPostSelectorClick(e)
+                );
+                view.addEventListener("postClick", (e) =>
+                    this._evtPostClick(e)
+                );
+                view.addEventListener("bulkEditTagChange", (e) =>
+                    this._evtBulkEditTagChange(e)
+                );
+                view.addEventListener("bulkEditSaveClick", (e) =>
+                    this._evtBulkEditSaveClick(e)
+                );
+                view.addEventListener("bulkEditCancelClick", (e) =>
+                    this._evtBulkEditCancelClick(e)
+                );
                 // view.addEventListener("startBulkEdit", (e) => this._evtStartBulkEdit(e));
                 // view.addEventListener("applyBulkEdit", (e) => this._evtApplyBulkEdit(e));
                 // view.addEventListener("cancelBulkEdit", (e) => this._evtCancelBulkEdit(e));

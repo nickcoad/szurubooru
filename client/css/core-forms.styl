@@ -2,7 +2,6 @@
 
 form
     display: block
-    width: 20em
 
     .input
         list-style-type: none
@@ -199,14 +198,15 @@ input[type=number]
     text-overflow: ellipsis
     width: 100%
     box-sizing: border-box
-    border: 2px solid $input-enabled-border-color
+    border: 1px solid $input-enabled-border-color
+    border-radius: 5px
     background: $input-enabled-background-color
     color: $input-enabled-text-color
     box-shadow: none /* :-moz-submit-invalid on FF */
     transition: border-color 0.1s linear, background-color 0.1s linear
 
     &:disabled
-        border: 2px solid $input-disabled-border-color
+        border-color: $input-disabled-border-color
         background: $input-disabled-background-color
         color: $input-disabled-text-color
 
@@ -214,7 +214,7 @@ input[type=number]
         border-color: $main-color
 
     &[readonly]
-        border: 2px solid $input-disabled-border-color
+        border-color: $input-disabled-border-color
         background: $input-disabled-background-color
         color: $input-disabled-text-color
 
@@ -225,7 +225,7 @@ input[type=number]
     input[type=email],
     input[type=password],
     input[type=number]
-        border: 2px solid darken($input-enabled-border-color, 75%)
+        border-color: darken($input-enabled-border-color, 50%)
         background: darken($input-enabled-background-color, 75%)
         color: $input-enabled-text-color-darktheme
         &:disabled
