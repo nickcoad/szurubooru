@@ -5,7 +5,7 @@ dc-up: ## Bring up the stack
 	docker compose up -d
 
 .PHONY: dc-up-dev
-dc-up-dev: ## Bring up the stack
+dc-up-dev: ## Start the stack up in developer mode
 	docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 
 .PHONY: dc-down

@@ -117,6 +117,8 @@ class PostUploadController {
     }
 
     _uploadSinglePost(uploadable, skipDuplicates, alwaysUploadSimilar) {
+        const uploadType = (uploadable.url) ? "url" : "file";
+
         progress.start();
         let reverseSearchPromise = Promise.resolve();
         if (!uploadable.lookalikesConfirmed) {
@@ -161,6 +163,11 @@ class PostUploadController {
 
                 // no duplicates, proceed with saving
                 let post = this._uploadableToPost(uploadable);
+
+                if (uploadType === "file") {
+                    post.title = uploadable.file.name;
+                }
+
                 let savePromise = post.save(uploadable.anonymous).then(() => {
                     this._view.removeUploadable(uploadable);
                     return Promise.resolve();
