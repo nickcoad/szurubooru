@@ -39,7 +39,7 @@ class PostListController {
 
         this._selectedPosts = new Set();
 
-        topNavigation.activate("posts");
+        topNavigation.activate("photos");
         topNavigation.setTitle("Listing posts");
 
         this._headerCtx = {
@@ -118,7 +118,7 @@ class PostListController {
 
     _evtNavigate(e) {
         router.showNoDispatch(
-            uri.formatClientLink("posts", e.detail.parameters)
+            uri.formatClientLink("photos", e.detail.parameters)
         );
         Object.assign(this._ctx.parameters, e.detail.parameters);
         this._syncPageController();
@@ -231,24 +231,12 @@ class PostListController {
     }
 
     async _evtBulkEditSaveClick(e) {
-        async function savePost(post, tags) {
-            for (const tagToApply of tags) {
+        for (const postId of this._selectedPosts) {
+            const post = this._postIdToPost[postId];
+            for (const tagToApply of this._bulkEditTagsToApply) {
                 post.tags.addByName(tagToApply.names[0]);
             }
             await post.save();
-        }
-
-        // Await first save, this creates any new tags, then
-        // the others can be saved in parallel
-        let iter = 0;
-        for (const postId of this._selectedPosts) {
-            const post = this._postIdToPost[postId];
-            if (iter === 0) {
-                await savePost(post, this._bulkEditTagsToApply);
-            } else {
-                savePost(post, this._bulkEditTagsToApply);
-            }
-            iter++;
         }
         this._isBulkEditing = false;
         this._selectedPosts = new Set();
@@ -273,11 +261,11 @@ class PostListController {
                     offset: offset,
                     limit: limit,
                 });
-                return uri.formatClientLink("posts", parameters);
+                return uri.formatClientLink("photos", parameters);
             },
             requestPage: (offset, limit) => {
                 return PostList.search(
-                    this._ctx.parameters.query,
+                    "type:image " + (this._ctx.parameters.query || ""),
                     offset,
                     limit,
                     fields
@@ -342,7 +330,7 @@ class PostListController {
 }
 
 module.exports = (router) => {
-    router.enter(["posts"], (ctx, next) => {
+    router.enter(["photos"], (ctx, next) => {
         ctx.controller = new PostListController(ctx);
     });
 };
