@@ -207,6 +207,9 @@ class Post(Base):
         nullable=True,
         index=True,
     )
+    folder_id = sa.Column(
+        "folder_id", sa.Integer, sa.ForeignKey("folder.id", ondelete="SET NULL"), nullable=True
+    )
     version = sa.Column("version", sa.Integer, default=1, nullable=False)
     creation_time = sa.Column("creation_time", sa.DateTime, nullable=False)
     last_edit_time = sa.Column("last_edit_time", sa.DateTime)
@@ -227,6 +230,7 @@ class Post(Base):
 
     # foreign tables
     user = sa.orm.relationship("User")
+    folder = sa.orm.relationship("Folder", back_populates="posts")
     tags = sa.orm.relationship("Tag", backref="posts", secondary="post_tag")
     signature = sa.orm.relationship(
         "PostSignature",

@@ -82,6 +82,7 @@ function _makeTopNavigation() {
     ret.add("posts", new TopNavigationItem("P", "Posts", "posts"));
     ret.add("photos", new TopNavigationItem("h", "Photos", "photos"));
     ret.add("videos", new TopNavigationItem("V", "Videos", "videos"));
+    ret.add("folders", new TopNavigationItem("F", "Folders", "folders"));
     ret.add("upload", new TopNavigationItem("U", "Upload", "upload"));
     ret.add("comments", new TopNavigationItem("C", "Comments", "comments"));
     ret.add("tags", new TopNavigationItem("T", "Tags", "tags"));

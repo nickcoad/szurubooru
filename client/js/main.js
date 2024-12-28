@@ -89,6 +89,9 @@ Promise.resolve()
             controllers.push(
                 require("./controllers/video_list_controller.js")
             );
+            controllers.push(
+                require("./controllers/folder_controller.js")
+            );
 
             // 404 controller needs to be registered last
             controllers.push(require("./controllers/not_found_controller.js"));

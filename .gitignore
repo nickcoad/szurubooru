@@ -14,4 +14,6 @@ server/**/bin/
 server/**/pyvenv.cfg
 __pycache__/
 
+server/.venv
+
 tmp
