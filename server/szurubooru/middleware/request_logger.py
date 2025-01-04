@@ -7,7 +7,13 @@ logger = logging.getLogger(__name__)
 
 
 @middleware.pre_hook
-def process_request(_ctx: rest.Context) -> None:
+def process_request(ctx: rest.Context) -> None:
+    logger.info(
+        "%s %s Received request (user=%s)",
+        ctx.method,
+        ctx.url,
+        ctx.user.name,
+    )
     db.reset_query_count()
 
 

@@ -3,3 +3,7 @@ services:
   client:
     volumes:
       - ./client/public:/var/www
+
+  server:
+    volumes:
+      - ./server:/opt/app

@@ -1,4 +1,5 @@
 import szurubooru.api.comment_api
+import szurubooru.api.folder_api
 import szurubooru.api.info_api
 import szurubooru.api.password_reset_api
 import szurubooru.api.pool_api

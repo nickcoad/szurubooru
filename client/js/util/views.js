@@ -492,7 +492,6 @@ function enableForm(form) {
 }
 
 function syncScrollPosition() {
-    console.log(history.state);
     window.requestAnimationFrame(() => {
         if (
             history.state &&

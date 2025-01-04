@@ -40,7 +40,6 @@
             categories[tag.category].push(tag)
         }
     %>
-    
     <nav class='tags'>
     <% for (const [category, tags] of Object.entries(categories)) { %>
         <h1><%= category === "default" ? "Other Tags" : kebabToTitleCase(category) %> (<%- tags.length %>)</h1>
@@ -56,7 +55,7 @@
                             --></a><!--
                         --><% } %><!--
                         --><% if (ctx.canListPosts) { %><!--
-                            --><a href='<%- ctx.formatClientLink('posts', {query: ctx.escapeTagName(tag.names[0])}) %>'><!--
+                            --><a href='<%- ctx.formatClientLink(ctx.post.type === 'image' ? 'photos' : 'videos', {query: ctx.escapeTagName(tag.names[0])}) %>'><!--
                         --><% } %><!--
                             --><%- ctx.getPrettyName(tag.names[0]) %><!--
                         --><% if (ctx.canListPosts) { %><!--
